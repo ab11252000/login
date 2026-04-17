@@ -173,18 +173,59 @@ h1 {
 
 </div>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-// ============================================================
-// 測試資料初始化（首次開啟時寫入 localStorage）
-// ============================================================
-function handleLineLogin() {
-  document.getElementById('overlay').classList.add('on');
-  // TODO: 串接真實 LINE Login API
+const LIFF_ID = localStorage.getItem('xy_liffId') || '';
+
+async function initLiff() {
+  if (!LIFF_ID) {
+    showError('尚未設定 LIFF ID，請聯絡管理員。');
+    return;
+  }
+
+  // 已登入直接跳轉
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    window.location.href = '下單.html';
+    return;
+  }
+
+  try {
+    await liff.init({ liffId: LIFF_ID });
+
+    if (liff.isLoggedIn()) {
+      // 登入成功，取得用戶資料
+      document.getElementById('overlay').classList.add('on');
+      const profile = await liff.getProfile();
+      const user = {
+        id:     profile.userId,
+        name:   profile.displayName,
+        avatar: profile.displayName.charAt(0),
+        lineId: profile.userId,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('isLoggedIn', 'true');
+      window.location.href = '下單.html';
+    }
+    // 未登入 → 等用戶按按鈕
+  } catch(e) {
+    showError('LIFF 初始化失敗：' + e.message);
+  }
 }
 
-if (localStorage.getItem('isLoggedIn') === 'true') {
-  window.location.href = '下單.html';
+function handleLineLogin() {
+  if (!LIFF_ID) { showError('尚未設定 LIFF ID，請聯絡管理員。'); return; }
+  document.getElementById('overlay').classList.add('on');
+  liff.login();
 }
+
+function showError(msg) {
+  var el = document.createElement('p');
+  el.style.cssText = 'color:#ef4444;font-size:13px;margin-top:18px;font-weight:600;';
+  el.textContent = msg;
+  document.querySelector('.card').appendChild(el);
+}
+
+initLiff();
 </script>
 </body>
 </html>
