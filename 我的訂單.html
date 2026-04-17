@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的訂單 — 翔躍下單系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#06C755; --green-dark:#04A347; --green-light:#e8faf0;
+  --text:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+.nav {
+  background:white; border-bottom:1px solid var(--border);
+  padding:0 24px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:50;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.nav-brand { font-size:18px; font-weight:900; color:var(--green); }
+.nav-links { display:flex; gap:4px; }
+.nav-link {
+  padding:8px 14px; border-radius:10px;
+  font-size:14px; font-weight:500; text-decoration:none; color:var(--muted);
+  transition:all .15s;
+}
+.nav-link:hover, .nav-link.active { background:var(--green-light); color:var(--green); font-weight:700; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.user-chip {
+  display:flex; align-items:center; gap:8px;
+  background:var(--green-light); padding:6px 14px 6px 10px;
+  border-radius:100px; font-size:13px; font-weight:600; color:var(--green);
+}
+.btn-logout {
+  padding:7px 14px; border-radius:10px;
+  border:1.5px solid var(--border); background:white; color:var(--muted);
+  font-size:13px; font-weight:500; font-family:inherit; cursor:pointer; transition:all .15s;
+}
+.btn-logout:hover { border-color:#fca5a5; color:#ef4444; background:#fff5f5; }
+
+.main { max-width:820px; margin:0 auto; padding:40px 24px; }
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
+.page-title { font-size:26px; font-weight:900; letter-spacing:-.4px; }
+
+/* Filter bar */
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn {
+  padding:7px 16px; border-radius:100px;
+  border:1.5px solid var(--border); background:white;
+  font-size:13px; font-weight:600; color:var(--muted);
+  cursor:pointer; transition:all .15s; font-family:inherit;
+}
+.filter-btn:hover { border-color:var(--green); color:var(--green); }
+.filter-btn.on { background:var(--green); color:white; border-color:var(--green); }
+
+/* Order cards */
+.order-list { display:flex; flex-direction:column; gap:14px; margin-top:24px; }
+.order-card {
+  background:white; border-radius:18px; padding:24px 28px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
+  border:1.5px solid transparent; transition:border-color .15s, box-shadow .15s;
+  display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start;
+}
+.order-card:hover { border-color:var(--green-light); box-shadow:0 4px 20px rgba(6,199,85,.08); }
+.order-id { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.5px; margin-bottom:6px; }
+.order-store { font-size:17px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.order-content {
+  font-size:14px; color:var(--muted); line-height:1.6;
+  white-space:pre-wrap; margin-bottom:10px;
+}
+.order-meta { display:flex; gap:16px; flex-wrap:wrap; }
+.meta-item { font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:4px; }
+.order-note {
+  margin-top:10px;
+  background:#f3f4f6; border-radius:8px; padding:8px 12px;
+  font-size:12px; color:var(--muted);
+}
+
+/* Status badges */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:100px;
+  font-size:12px; font-weight:700; white-space:nowrap;
+}
+.badge-pending    { background:#fef9c3; color:#a16207; }
+.badge-processing { background:#dbeafe; color:#1d4ed8; }
+.badge-completed  { background:var(--green-light); color:var(--green-dark); }
+.badge-cancelled  { background:#fee2e2; color:#b91c1c; }
+
+/* Empty state */
+.empty {
+  text-align:center; padding:80px 20px;
+  color:var(--muted);
+}
+.empty-icon { font-size:56px; margin-bottom:16px; }
+.empty h3 { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.empty p { font-size:14px; line-height:1.7; }
+.empty a { color:var(--green); font-weight:700; text-decoration:none; }
+
+/* Stats */
+.stats-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
+.stat-chip {
+  background:white; border:1.5px solid var(--border);
+  border-radius:12px; padding:10px 18px;
+  font-size:13px; font-weight:600; color:var(--muted);
+  display:flex; align-items:center; gap:6px;
+}
+.stat-chip strong { color:var(--text); font-size:16px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">翔躍下單</div>
+  <div class="nav-links">
+    <a href="下單.html"     class="nav-link">訂貨叫貨</a>
+    <a href="我的訂單.html" class="nav-link active">我的訂單</a>
+    <a href="我的店面.html"  class="nav-link">我的店面</a>
+  </div>
+  <div class="nav-right">
+    <div class="user-chip">
+      <span id="userAvatar"></span>
+      <span id="userName"></span>
+    </div>
+    <button class="btn-logout" onclick="logout()">登出</button>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">我的訂單</div>
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn on" data-status="all"        onclick="setFilter('all')">全部</button>
+      <button class="filter-btn"    data-status="pending"    onclick="setFilter('pending')">待處理</button>
+      <button class="filter-btn"    data-status="processing" onclick="setFilter('processing')">處理中</button>
+      <button class="filter-btn"    data-status="completed"  onclick="setFilter('completed')">已完成</button>
+      <button class="filter-btn"    data-status="cancelled"  onclick="setFilter('cancelled')">已取消</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="order-list" id="orderList"></div>
+</main>
+
+<script>
+// 認證
+const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if (!user || localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html';
+
+document.getElementById('userAvatar').textContent = user.avatar;
+document.getElementById('userName').textContent   = user.name;
+
+const STATUS_MAP = {
+  pending:    { label:'待處理', cls:'badge-pending',    icon:'' },
+  processing: { label:'處理中', cls:'badge-processing', icon:'' },
+  completed:  { label:'已完成', cls:'badge-completed',  icon:'' },
+  cancelled:  { label:'已取消', cls:'badge-cancelled',  icon:'' },
+};
+
+let currentFilter = 'all';
+
+function renderStats(orders) {
+  const counts = { all:orders.length };
+  Object.keys(STATUS_MAP).forEach(s => counts[s] = orders.filter(o => o.status === s).length);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-chip"><strong>${counts.all}</strong> 筆訂單</div>
+    <div class="stat-chip"><strong>${counts.pending}</strong> 待處理</div>
+    <div class="stat-chip"><strong>${counts.processing}</strong> 處理中</div>
+    <div class="stat-chip"><strong>${counts.completed}</strong> 已完成</div>
+  `;
+}
+
+function renderOrders() {
+  const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+  const myOrders  = allOrders.filter(o => o.userId === user.id)
+                              .sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+
+  renderStats(myOrders);
+
+  const filtered = currentFilter === 'all' ? myOrders : myOrders.filter(o => o.status === currentFilter);
+  const list = document.getElementById('orderList');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon"></div>
+        <h3>${currentFilter === 'all' ? '還沒有訂單' : '此分類沒有訂單'}</h3>
+        <p>趕快去 <a href="下單.html">訂貨叫貨</a> 建立第一筆訂單吧！</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(o => {
+    const s = STATUS_MAP[o.status] || STATUS_MAP.pending;
+    const noteHtml = o.note ? `<div class="order-note">備註：${o.note}</div>` : '';
+    return `
+      <div class="order-card">
+        <div>
+          <div class="order-id"># ${o.id}</div>
+          <div class="order-store">${o.storeName}</div>
+          <div class="order-content">${o.content}</div>
+          <div class="order-meta">
+            <span class="meta-item">${o.district}</span>
+            <span class="meta-item">${o.createdAt}</span>
+          </div>
+          ${noteHtml}
+        </div>
+        <div>
+          <span class="badge ${s.cls}">${s.label}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setFilter(status) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.status === status);
+  });
+  renderOrders();
+}
+
+function logout() {
+  if (!confirm('確定要登出嗎？')) return;
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('currentUser');
+  window.location.href = 'index.html';
+}
+
+renderOrders();
+</script>
+</body>
+</html>

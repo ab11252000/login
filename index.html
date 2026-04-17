@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE 登入 — 翔躍下單系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #06C755;
+  --green-dark: #04A347;
+  --green-light: #e8faf0;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #f0faf4;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.bg-blob-1 {
+  width: 600px; height: 600px;
+  top: -200px; right: -200px;
+  background: radial-gradient(circle, rgba(6,199,85,0.12) 0%, transparent 65%);
+}
+.bg-blob-2 {
+  width: 500px; height: 500px;
+  bottom: -180px; left: -180px;
+  background: radial-gradient(circle, rgba(6,199,85,0.08) 0%, transparent 65%);
+}
+.card {
+  background: white;
+  border-radius: 28px;
+  padding: 56px 48px;
+  width: 440px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 20px 60px rgba(6,199,85,0.10), 0 4px 16px rgba(0,0,0,0.06);
+  position: relative;
+  z-index: 1;
+  animation: fadeUp .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(28px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.logo-box {
+  width: 92px; height: 92px;
+  background: linear-gradient(145deg, #06C755, #04A347);
+  border-radius: 26px;
+  margin: 0 auto 28px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(6,199,85,.32);
+}
+.logo-box svg { width: 52px; height: 52px; }
+h1 {
+  font-size: 28px; font-weight: 900;
+  color: var(--text); letter-spacing: -.6px;
+  margin-bottom: 10px;
+}
+.sub {
+  color: var(--muted); font-size: 14px;
+  line-height: 1.8; margin-bottom: 44px;
+}
+.line-btn {
+  display: flex;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--green);
+  color: white;
+  border: none; border-radius: 16px;
+  padding: 19px 28px;
+  font-size: 16px; font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 4px 20px rgba(6,199,85,.28);
+}
+.line-btn:hover {
+  background: var(--green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 36px rgba(6,199,85,.42);
+}
+.line-btn:active { transform: translateY(0); }
+.line-icon-box {
+  width: 32px; height: 32px;
+  background: white;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sep {
+  display: flex; align-items: center;
+  gap: 14px; margin: 30px 0;
+  font-size: 12px; color: #d1d5db;
+}
+.sep::before, .sep::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.notice { font-size: 12px; color: #9ca3af; line-height: 1.9; }
+/* Loading overlay */
+#overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,.92);
+  z-index: 99;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  backdrop-filter: blur(4px);
+}
+#overlay.on { display: flex; }
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#overlay p { font-size: 14px; color: var(--muted); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+
+<div id="overlay">
+  <div class="spinner"></div>
+  <p>LINE 登入驗證中，請稍候…</p>
+</div>
+
+<div class="card">
+  <div class="logo-box">
+    <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="10" width="40" height="26" rx="8" fill="white" fill-opacity=".9"/>
+      <circle cx="17" cy="23" r="3" fill="#06C755"/>
+      <circle cx="26" cy="23" r="3" fill="#06C755"/>
+      <circle cx="35" cy="23" r="3" fill="#06C755"/>
+      <path d="M20 36 L26 44 L32 36" fill="white" fill-opacity=".9"/>
+    </svg>
+  </div>
+
+  <h1>翔躍下單系統</h1>
+  <p class="sub">快速、便捷的在線下單平台<br>使用 LINE 帳號即可立即開始使用</p>
+
+  <button class="line-btn" onclick="handleLineLogin()">
+    <div class="line-icon-box">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#06C755">
+        <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+      </svg>
+    </div>
+    使用 LINE 帳號登入
+  </button>
+
+  <div class="sep">安全登入保障</div>
+  <p class="notice">
+    本系統採用 LINE 官方 OAuth 2.0 認證機制<br>
+    您的個人資料受到完整安全保護，不會外洩
+  </p>
+
+</div>
+
+<script>
+// ============================================================
+// 測試資料初始化（首次開啟時寫入 localStorage）
+// ============================================================
+function handleLineLogin() {
+  document.getElementById('overlay').classList.add('on');
+  // TODO: 串接真實 LINE Login API
+}
+
+if (localStorage.getItem('isLoggedIn') === 'true') {
+  window.location.href = '下單.html';
+}
+</script>
+</body>
+</html>

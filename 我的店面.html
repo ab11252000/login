@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的店面 — 翔躍下單系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#06C755; --green-dark:#04A347; --green-light:#e8faf0;
+  --text:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+.nav {
+  background:white; border-bottom:1px solid var(--border);
+  padding:0 24px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:50;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.nav-brand { font-size:18px; font-weight:900; color:var(--green); }
+.nav-links { display:flex; gap:4px; }
+.nav-link {
+  padding:8px 14px; border-radius:10px;
+  font-size:14px; font-weight:500; text-decoration:none; color:var(--muted); transition:all .15s;
+}
+.nav-link:hover, .nav-link.active { background:var(--green-light); color:var(--green); font-weight:700; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.user-chip {
+  display:flex; align-items:center; gap:8px;
+  background:var(--green-light); padding:6px 14px 6px 10px;
+  border-radius:100px; font-size:13px; font-weight:600; color:var(--green);
+}
+.btn-logout {
+  padding:7px 14px; border-radius:10px;
+  border:1.5px solid var(--border); background:white; color:var(--muted);
+  font-size:13px; font-weight:500; font-family:inherit; cursor:pointer; transition:all .15s;
+}
+.btn-logout:hover { border-color:#fca5a5; color:#ef4444; background:#fff5f5; }
+
+.main { max-width:860px; margin:0 auto; padding:40px 24px; }
+.page-title { font-size:26px; font-weight:900; letter-spacing:-.4px; margin-bottom:6px; }
+.page-sub { color:var(--muted); font-size:14px; margin-bottom:36px; }
+
+.section-title {
+  font-size:16px; font-weight:800; color:var(--text);
+  margin-bottom:18px; display:flex; align-items:center; gap:8px;
+}
+.section-title::after { content:''; flex:1; height:1.5px; background:var(--border); }
+
+.card {
+  background:white; border-radius:20px; padding:32px 36px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  margin-bottom:36px;
+}
+
+.form-group { margin-bottom:22px; }
+.form-label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.form-label span { color:#ef4444; margin-left:2px; }
+.form-control {
+  width:100%; padding:13px 16px;
+  border:1.5px solid var(--border); border-radius:12px;
+  font-size:15px; font-family:inherit; color:var(--text);
+  transition:border-color .15s, box-shadow .15s; outline:none; background:white;
+}
+.form-control:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(6,199,85,.12); }
+select.form-control {
+  cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; padding-right:40px;
+}
+.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+.btn-submit {
+  width:100%; padding:16px;
+  background:var(--green); color:white;
+  border:none; border-radius:14px;
+  font-size:15px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 4px 18px rgba(6,199,85,.28);
+}
+.btn-submit:hover { background:var(--green-dark); transform:translateY(-2px); box-shadow:0 8px 28px rgba(6,199,85,.38); }
+.btn-submit:active { transform:translateY(0); }
+
+/* Store cards */
+.store-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:16px; }
+.store-card {
+  background:white; border-radius:18px; padding:24px;
+  border:1.5px solid var(--border);
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+  transition:border-color .15s, box-shadow .15s;
+}
+.store-card:hover { border-color:var(--green-light); box-shadow:0 4px 16px rgba(6,199,85,.08); }
+.store-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; gap:8px; }
+.store-name { font-size:17px; font-weight:800; color:var(--text); }
+.store-info { font-size:13px; color:var(--muted); line-height:1.8; }
+.store-info .row { display:flex; gap:6px; }
+.store-info .lbl { color:#9ca3af; min-width:36px; }
+
+/* Status badges */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:100px;
+  font-size:12px; font-weight:700; white-space:nowrap; flex-shrink:0;
+}
+.badge-pending  { background:#fef9c3; color:#a16207; }
+.badge-approved { background:var(--green-light); color:var(--green-dark); }
+.badge-blocked  { background:#fee2e2; color:#b91c1c; }
+.badge-rejected { background:#f3f4f6; color:#374151; }
+
+.empty { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+.empty-icon { font-size:40px; margin-bottom:12px; }
+
+/* Toast */
+#toast {
+  position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#111827; color:white; padding:14px 24px; border-radius:14px;
+  font-size:14px; font-weight:600; box-shadow:0 8px 32px rgba(0,0,0,.2);
+  transition:transform .35s cubic-bezier(.16,1,.3,1), opacity .35s;
+  opacity:0; z-index:200;
+}
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* Notice */
+.notice-box {
+  background:#fffbeb; border:1.5px solid #fde68a;
+  border-radius:12px; padding:14px 18px;
+  font-size:13px; color:#92400e; line-height:1.7;
+  margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">翔躍下單</div>
+  <div class="nav-links">
+    <a href="下單.html"     class="nav-link">訂貨叫貨</a>
+    <a href="我的訂單.html" class="nav-link">我的訂單</a>
+    <a href="我的店面.html"  class="nav-link active">我的店面</a>
+  </div>
+  <div class="nav-right">
+    <div class="user-chip">
+      <span id="userAvatar"></span>
+      <span id="userName"></span>
+    </div>
+    <button class="btn-logout" onclick="logout()">登出</button>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="page-title">我的店面</div>
+  <p class="page-sub">申請開設店面，審核通過後即可接受客戶下單</p>
+
+  <!-- 申請表單 -->
+  <div class="section-title">申請新店面</div>
+
+  <div class="notice-box">
+    申請後將由管理員進行審核，審核結果會更新於下方店面狀態。申請時間約需 1～3 個工作天。
+  </div>
+
+  <div class="card">
+    <form id="storeForm" onsubmit="applyStore(event)">
+      <div class="form-group">
+        <label class="form-label" for="storeName">店面名稱 <span>*</span></label>
+        <input class="form-control" type="text" id="storeName" required>
+      </div>
+      <div class="row-2">
+        <div class="form-group">
+          <label class="form-label" for="storeCity">縣市 <span>*</span></label>
+          <select class="form-control" id="storeCity" required>
+            <option value="">— 請選擇縣市 —</option>
+            <option>台北市</option><option>新北市</option><option>桃園市</option>
+            <option>台中市</option><option>台南市</option><option>高雄市</option>
+            <option>基隆市</option><option>新竹市</option><option>嘉義市</option>
+            <option>新竹縣</option><option>苗栗縣</option><option>彰化縣</option>
+            <option>南投縣</option><option>雲林縣</option><option>嘉義縣</option>
+            <option>屏東縣</option><option>宜蘭縣</option><option>花蓮縣</option>
+            <option>台東縣</option><option>澎湖縣</option><option>金門縣</option>
+            <option>連江縣</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="storeDistrict">地區（鄉鎮市區）<span>*</span></label>
+          <input class="form-control" type="text" id="storeDistrict" required>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="form-group">
+          <label class="form-label" for="storePhone">聯絡電話 <span>*</span></label>
+          <input class="form-control" type="text" id="storePhone" required>
+        </div>
+        <div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="storeAddress">完整地址 <span>*</span></label>
+        <input class="form-control" type="text" id="storeAddress" required>
+      </div>
+      <button type="submit" class="btn-submit">送出店面申請</button>
+    </form>
+  </div>
+
+  <!-- 我的店面列表 -->
+  <div class="section-title">我的店面</div>
+  <div class="store-grid" id="storeGrid"></div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if (!user || localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html';
+
+document.getElementById('userAvatar').textContent = user.avatar;
+document.getElementById('userName').textContent   = user.name;
+
+const STATUS_MAP = {
+  pending:  { label:'審核中', cls:'badge-pending',  icon:'' },
+  approved: { label:'已通過', cls:'badge-approved', icon:'' },
+  blocked:  { label:'已封鎖', cls:'badge-blocked',  icon:'' },
+  rejected: { label:'已拒絕', cls:'badge-rejected', icon:'' },
+};
+
+function renderStores() {
+  const stores   = JSON.parse(localStorage.getItem('stores') || '[]');
+  const myStores = stores.filter(s => s.ownerId === user.id)
+                         .sort((a,b) => b.appliedAt.localeCompare(a.appliedAt));
+  const grid = document.getElementById('storeGrid');
+
+  if (myStores.length === 0) {
+    grid.innerHTML = `<div class="empty"><p>尚無申請記錄，立即填寫上方表單送出申請！</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = myStores.map(s => {
+    const st = STATUS_MAP[s.status] || STATUS_MAP.pending;
+    return `
+      <div class="store-card">
+        <div class="store-header">
+          <div class="store-name">${s.name}</div>
+          <span class="badge ${st.cls}">${st.label}</span>
+        </div>
+        <div class="store-info">
+          <div class="row"><span class="lbl">縣市</span><span>${s.city||''}</span></div>
+          <div class="row"><span class="lbl">地區</span><span>${s.district}</span></div>
+          <div class="row"><span class="lbl">地址</span><span>${s.address}</span></div>
+          <div class="row"><span class="lbl">電話</span><span>${s.phone}</span></div>
+          <div class="row"><span class="lbl">申請</span><span>${s.appliedAt}</span></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function applyStore(e) {
+  e.preventDefault();
+  const stores = JSON.parse(localStorage.getItem('stores') || '[]');
+  const id     = 'S' + String(Date.now()).slice(-5);
+  const today  = new Date().toISOString().slice(0,10);
+
+  stores.push({
+    id,
+    ownerId:   user.id,
+    ownerName: user.name,
+    name:      document.getElementById('storeName').value.trim(),
+    city:      document.getElementById('storeCity').value,
+    district:  document.getElementById('storeDistrict').value.trim(),
+    address:   document.getElementById('storeAddress').value.trim(),
+    phone:     document.getElementById('storePhone').value.trim(),
+    status:    'pending',
+    appliedAt: today,
+  });
+
+  localStorage.setItem('stores', JSON.stringify(stores));
+  document.getElementById('storeForm').reset();
+  renderStores();
+  showToast('店面申請已送出，待管理員審核！');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function logout() {
+  if (!confirm('確定要登出嗎？')) return;
+  localStorage.removeItem('isLoggedIn'); localStorage.removeItem('currentUser');
+  window.location.href = 'index.html';
+}
+
+renderStores();
+</script>
+</body>
+</html>
