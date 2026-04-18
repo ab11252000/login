@@ -134,7 +134,7 @@ h1 {
 
 <div id="overlay">
   <div class="spinner"></div>
-  <p>LINE 登入驗證中，請稍候…</p>
+  <p id="overlayMsg">初始化中…</p>
 </div>
 
 <div class="card">
@@ -169,41 +169,65 @@ h1 {
 <script>
 const LIFF_ID = localStorage.getItem('xy_liffId') || '2009824470-aKS2WXeU';
 
-async function initLiff() {
-  if (!LIFF_ID) {
-    showError('尚未設定 LIFF ID，請聯絡管理員。');
-    return;
-  }
+function sessionValid() {
+  return localStorage.getItem('isLoggedIn') === 'true';
+}
 
-  if (localStorage.getItem('isLoggedIn') === 'true') {
+function setOverlay(msg) {
+  document.getElementById('overlayMsg').textContent = msg;
+  document.getElementById('overlay').classList.add('on');
+}
+
+async function saveAndRedirect(profile) {
+  const user = {
+    id:     profile.userId,
+    name:   profile.displayName,
+    avatar: profile.displayName.charAt(0),
+    lineId: profile.userId,
+  };
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  localStorage.setItem('isLoggedIn',  'true');
+  window.location.href = '下單.html';
+}
+
+async function initLiff() {
+  if (!LIFF_ID) { showError('尚未設定 LIFF ID，請聯絡管理員。'); return; }
+
+  // 已有有效 session → 直接進入，不啟動 LIFF
+  if (sessionValid()) {
     window.location.href = '下單.html';
     return;
   }
 
+  // 尚未登入 → 清除舊資料
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('currentUser');
+
   try {
+    setOverlay('初始化中…');
     await liff.init({ liffId: LIFF_ID });
 
     if (liff.isLoggedIn()) {
-      document.getElementById('overlay').classList.add('on');
+      // 已在 LINE App 內授權，直接取 profile
+      setOverlay('LINE 登入驗證中，請稍候…');
       const profile = await liff.getProfile();
-      const user = {
-        id:     profile.userId,
-        name:   profile.displayName,
-        avatar: profile.displayName.charAt(0),
-        lineId: profile.userId,
-      };
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      localStorage.setItem('isLoggedIn', 'true');
-      window.location.href = '下單.html';
+      await saveAndRedirect(profile);
+    } else if (liff.isInClient()) {
+      // 在 LINE App 內開啟但尚未授權 → 靜默觸發授權，不需按按鈕
+      liff.login();
+    } else {
+      // 外部瀏覽器 → 顯示登入按鈕讓用戶點擊（點後會跳轉 LINE App）
+      document.getElementById('overlay').classList.remove('on');
     }
   } catch(e) {
-    showError('LIFF 初始化失敗：' + e.message);
+    document.getElementById('overlay').classList.remove('on');
+    showError('初始化失敗：' + e.message);
   }
 }
 
 function handleLineLogin() {
   if (!LIFF_ID) { showError('尚未設定 LIFF ID，請聯絡管理員。'); return; }
-  document.getElementById('overlay').classList.add('on');
+  setOverlay('前往 LINE 授權中…');
   liff.login();
 }
 
