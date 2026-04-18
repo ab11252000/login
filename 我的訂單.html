@@ -7,147 +7,244 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --green:#06C755; --green-dark:#04A347; --green-light:#e8faf0;
-  --text:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb;
+  --green:       #06C755;
+  --green-dark:  #04A347;
+  --green-dim:   rgba(6,199,85,.10);
+  --text:        #0D1117;
+  --text-2:      #4B5563;
+  --text-3:      #9CA3AF;
+  --border:      #E5E7EB;
+  --border-soft: #F3F4F6;
+  --bg:          #F4F6F8;
+  --card:        #FFFFFF;
+  --red:         #EF4444;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family:'Noto Sans TC', sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Nav ─────────────────────────────────────────────────────── */
 .nav {
-  background:white; border-bottom:1px solid var(--border);
-  padding:0 24px; height:64px;
-  display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:50;
-  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  height:58px;
+  display:flex; align-items:center;
+  padding:0 32px;
+  position:sticky; top:0; z-index:100;
 }
-.nav-brand { font-size:18px; font-weight:900; color:var(--green); }
-.nav-links { display:flex; gap:4px; }
+.nav-brand {
+  display:flex; align-items:center; gap:10px;
+  text-decoration:none; margin-right:36px; flex-shrink:0;
+}
+.nav-brand-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 3px rgba(6,199,85,.2);
+}
+.nav-brand-text { font-size:15px; font-weight:800; color:var(--text); letter-spacing:.2px; }
+.nav-brand-sub  { font-size:12px; color:var(--text-3); font-weight:400; letter-spacing:.3px; }
+.nav-brand-sep  { width:1px; height:16px; background:var(--border); }
+.nav-links { display:flex; align-items:center; gap:2px; flex:1; }
 .nav-link {
-  padding:8px 14px; border-radius:10px;
-  font-size:14px; font-weight:500; text-decoration:none; color:var(--muted);
-  transition:all .15s;
+  padding:6px 14px; border-radius:8px;
+  font-size:13px; font-weight:500; text-decoration:none;
+  color:var(--text-2); transition:all .15s; letter-spacing:.1px;
 }
-.nav-link:hover, .nav-link.active { background:var(--green-light); color:var(--green); font-weight:700; }
-.nav-right { display:flex; align-items:center; gap:12px; }
-.user-chip {
-  display:flex; align-items:center; gap:8px;
-  background:var(--green-light); padding:6px 14px 6px 10px;
-  border-radius:100px; font-size:13px; font-weight:600; color:var(--green);
+.nav-link:hover { background:var(--border-soft); color:var(--text); }
+.nav-link.active { color:var(--green); font-weight:700; background:var(--green-dim); }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.user-pill {
+  display:flex; align-items:center; gap:9px;
+  padding:5px 14px 5px 6px; border-radius:100px;
+  border:1px solid var(--border); background:var(--card);
 }
+.user-avatar {
+  width:26px; height:26px; border-radius:50%;
+  background:var(--green-dim); border:1.5px solid var(--green);
+  font-size:11px; font-weight:800; color:var(--green);
+  display:flex; align-items:center; justify-content:center;
+}
+.user-name { font-size:13px; font-weight:600; color:var(--text); }
 .btn-logout {
-  padding:7px 14px; border-radius:10px;
-  border:1.5px solid var(--border); background:white; color:var(--muted);
-  font-size:13px; font-weight:500; font-family:inherit; cursor:pointer; transition:all .15s;
+  padding:6px 14px; border-radius:8px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--text-2); font-size:12px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all .15s; letter-spacing:.1px;
 }
-.btn-logout:hover { border-color:#fca5a5; color:#ef4444; background:#fff5f5; }
+.btn-logout:hover { border-color:#FCA5A5; color:var(--red); background:#FFF5F5; }
 
-.main { max-width:820px; margin:0 auto; padding:40px 24px; }
-.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
-.page-title { font-size:26px; font-weight:900; letter-spacing:-.4px; }
-
-/* Filter bar */
-.filter-bar { display:flex; gap:8px; flex-wrap:wrap; }
-.filter-btn {
-  padding:7px 16px; border-radius:100px;
-  border:1.5px solid var(--border); background:white;
-  font-size:13px; font-weight:600; color:var(--muted);
-  cursor:pointer; transition:all .15s; font-family:inherit;
+/* ── Layout ───────────────────────────────────────────────────── */
+.main {
+  max-width:760px; margin:0 auto; padding:48px 24px 80px;
+  animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
 }
-.filter-btn:hover { border-color:var(--green); color:var(--green); }
-.filter-btn.on { background:var(--green); color:white; border-color:var(--green); }
-
-/* Order cards */
-.order-list { display:flex; flex-direction:column; gap:14px; margin-top:24px; }
-.order-card {
-  background:white; border-radius:18px; padding:24px 28px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
-  border:1.5px solid transparent; transition:border-color .15s, box-shadow .15s;
-  display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start;
-}
-.order-card:hover { border-color:var(--green-light); box-shadow:0 4px 20px rgba(6,199,85,.08); }
-.order-id { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.5px; margin-bottom:6px; }
-.order-store { font-size:17px; font-weight:800; color:var(--text); margin-bottom:4px; }
-.order-content {
-  font-size:14px; color:var(--muted); line-height:1.6;
-  white-space:pre-wrap; margin-bottom:10px;
-}
-.order-meta { display:flex; gap:16px; flex-wrap:wrap; }
-.meta-item { font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:4px; }
-.order-note {
-  margin-top:10px;
-  background:#f3f4f6; border-radius:8px; padding:8px 12px;
-  font-size:12px; color:var(--muted);
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
-/* Status badges */
-.badge {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:5px 12px; border-radius:100px;
-  font-size:12px; font-weight:700; white-space:nowrap;
+.page-header { margin-bottom:28px; }
+.page-header-eyebrow {
+  font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:8px;
 }
-.badge-pending    { background:#fef9c3; color:#a16207; }
-.badge-processing { background:#dbeafe; color:#1d4ed8; }
-.badge-completed  { background:var(--green-light); color:var(--green-dark); }
-.badge-cancelled  { background:#fee2e2; color:#b91c1c; }
-
-/* Empty state */
-.empty {
-  text-align:center; padding:80px 20px;
-  color:var(--muted);
+.page-header-title {
+  font-size:28px; font-weight:900; letter-spacing:-.6px; color:var(--text); line-height:1.1;
 }
-.empty-icon { font-size:56px; margin-bottom:16px; }
-.empty h3 { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
-.empty p { font-size:14px; line-height:1.7; }
-.empty a { color:var(--green); font-weight:700; text-decoration:none; }
+.page-header-row {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:16px; flex-wrap:wrap;
+}
 
-/* Stats */
-.stats-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
+/* ── Stats row ───────────────────────────────────────────────── */
+.stats-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
 .stat-chip {
-  background:white; border:1.5px solid var(--border);
-  border-radius:12px; padding:10px 18px;
-  font-size:13px; font-weight:600; color:var(--muted);
+  background:var(--card); border:1px solid var(--border);
+  border-radius:8px; padding:8px 16px;
+  font-size:12px; font-weight:500; color:var(--text-2);
   display:flex; align-items:center; gap:6px;
 }
-.stat-chip strong { color:var(--text); font-size:16px; }
+.stat-chip strong { color:var(--text); font-size:15px; font-weight:800; }
+
+/* ── Filter bar ──────────────────────────────────────────────── */
+.filter-bar { display:flex; gap:6px; flex-wrap:wrap; }
+.filter-btn {
+  padding:5px 14px; border-radius:100px;
+  border:1px solid var(--border); background:var(--card);
+  font-size:12px; font-weight:600; color:var(--text-2);
+  cursor:pointer; transition:all .15s; font-family:inherit; letter-spacing:.1px;
+}
+.filter-btn:hover { border-color:var(--green); color:var(--green); }
+.filter-btn.on { background:var(--green); color:white; border-color:var(--green); box-shadow:0 2px 8px rgba(6,199,85,.28); }
+
+/* ── Order list ──────────────────────────────────────────────── */
+.order-list { display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+
+.order-card {
+  background:var(--card); border-radius:14px;
+  padding:20px 24px;
+  border:1px solid var(--border);
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start;
+  transition:border-color .15s, box-shadow .15s;
+}
+.order-card:hover {
+  border-color:rgba(6,199,85,.30);
+  box-shadow:0 4px 16px rgba(6,199,85,.08);
+}
+
+.order-id {
+  font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:6px;
+}
+.order-store { font-size:16px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.order-content {
+  font-size:13.5px; color:var(--text-2); line-height:1.7;
+  white-space:pre-wrap; margin-bottom:10px;
+}
+.order-meta { display:flex; gap:14px; flex-wrap:wrap; }
+.meta-item {
+  font-size:11.5px; color:var(--text-3);
+  display:flex; align-items:center; gap:4px;
+}
+.meta-item svg { width:12px; height:12px; flex-shrink:0; }
+.order-note {
+  margin-top:10px;
+  background:var(--border-soft); border-radius:8px; padding:8px 12px;
+  font-size:12px; color:var(--text-2); border-left:2px solid var(--border);
+}
+
+/* ── Status badges ───────────────────────────────────────────── */
+.badge {
+  display:inline-flex; align-items:center;
+  padding:4px 10px; border-radius:100px;
+  font-size:11px; font-weight:700; white-space:nowrap; letter-spacing:.3px;
+}
+.badge-pending    { background:#FEF9C3; color:#A16207; }
+.badge-processing { background:#DBEAFE; color:#1D4ED8; }
+.badge-completed  { background:var(--green-dim); color:var(--green-dark); }
+.badge-cancelled  { background:#FEE2E2; color:#B91C1C; }
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty {
+  text-align:center; padding:72px 20px;
+  color:var(--text-3);
+}
+.empty-icon {
+  width:56px; height:56px; border-radius:16px;
+  background:var(--border-soft); margin:0 auto 18px;
+  display:flex; align-items:center; justify-content:center;
+}
+.empty-icon svg { width:26px; height:26px; color:var(--text-3); }
+.empty h3 { font-size:16px; font-weight:700; color:var(--text-2); margin-bottom:6px; }
+.empty p  { font-size:13px; line-height:1.7; }
+.empty a  { color:var(--green); font-weight:700; text-decoration:none; }
+.empty a:hover { text-decoration:underline; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width:640px) {
+  .nav { padding:0 16px; }
+  .nav-brand-sub, .nav-brand-sep { display:none; }
+  .nav-link { padding:6px 10px; font-size:12px; }
+  .main { padding:32px 16px 64px; }
+  .user-name { display:none; }
+  .page-header-row { flex-direction:column; align-items:flex-start; }
+}
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <div class="nav-brand">翔躍下單</div>
+  <a class="nav-brand" href="下單.html">
+    <div class="nav-brand-dot"></div>
+    <span class="nav-brand-text">翔躍</span>
+    <div class="nav-brand-sep"></div>
+    <span class="nav-brand-sub">下單系統</span>
+  </a>
   <div class="nav-links">
-    <a href="下單.html"     class="nav-link">訂貨叫貨</a>
+    <a href="下單.html"     class="nav-link">訂叫貨</a>
     <a href="我的訂單.html" class="nav-link active">我的訂單</a>
     <a href="我的店面.html"  class="nav-link">我的店面</a>
   </div>
   <div class="nav-right">
-    <div class="user-chip">
-      <span id="userAvatar"></span>
-      <span id="userName"></span>
+    <div class="user-pill">
+      <div class="user-avatar"><span id="userAvatar"></span></div>
+      <span class="user-name" id="userName"></span>
     </div>
     <button class="btn-logout" onclick="logout()">登出</button>
   </div>
 </nav>
 
 <main class="main">
+
   <div class="page-header">
-    <div class="page-title">我的訂單</div>
-    <div class="filter-bar" id="filterBar">
-      <button class="filter-btn on" data-status="all"        onclick="setFilter('all')">全部</button>
-      <button class="filter-btn"    data-status="pending"    onclick="setFilter('pending')">待處理</button>
-      <button class="filter-btn"    data-status="processing" onclick="setFilter('processing')">處理中</button>
-      <button class="filter-btn"    data-status="completed"  onclick="setFilter('completed')">已完成</button>
-      <button class="filter-btn"    data-status="cancelled"  onclick="setFilter('cancelled')">已取消</button>
+    <div class="page-header-eyebrow">翔躍企業社</div>
+    <div class="page-header-row">
+      <div class="page-header-title">我的訂單</div>
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn on" data-status="all"        onclick="setFilter('all')">全部</button>
+        <button class="filter-btn"    data-status="pending"    onclick="setFilter('pending')">待處理</button>
+        <button class="filter-btn"    data-status="processing" onclick="setFilter('processing')">處理中</button>
+        <button class="filter-btn"    data-status="completed"  onclick="setFilter('completed')">已完成</button>
+        <button class="filter-btn"    data-status="cancelled"  onclick="setFilter('cancelled')">已取消</button>
+      </div>
     </div>
   </div>
 
   <div class="stats-row" id="statsRow"></div>
-
   <div class="order-list" id="orderList"></div>
+
 </main>
 
 <script>
-// 認證
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (!user || localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html';
 
@@ -155,10 +252,10 @@ document.getElementById('userAvatar').textContent = user.avatar;
 document.getElementById('userName').textContent   = user.name;
 
 const STATUS_MAP = {
-  pending:    { label:'待處理', cls:'badge-pending',    icon:'' },
-  processing: { label:'處理中', cls:'badge-processing', icon:'' },
-  completed:  { label:'已完成', cls:'badge-completed',  icon:'' },
-  cancelled:  { label:'已取消', cls:'badge-cancelled',  icon:'' },
+  pending:    { label:'待處理', cls:'badge-pending' },
+  processing: { label:'處理中', cls:'badge-processing' },
+  completed:  { label:'已完成', cls:'badge-completed' },
+  cancelled:  { label:'已取消', cls:'badge-cancelled' },
 };
 
 let currentFilter = 'all';
@@ -187,9 +284,15 @@ function renderOrders() {
   if (filtered.length === 0) {
     list.innerHTML = `
       <div class="empty">
-        <div class="empty-icon"></div>
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+          </svg>
+        </div>
         <h3>${currentFilter === 'all' ? '還沒有訂單' : '此分類沒有訂單'}</h3>
-        <p>趕快去 <a href="下單.html">訂貨叫貨</a> 建立第一筆訂單吧！</p>
+        <p>前往 <a href="下單.html">訂貨叫貨</a> 建立第一筆訂單</p>
       </div>`;
     return;
   }
@@ -204,8 +307,14 @@ function renderOrders() {
           <div class="order-store">${o.storeName}</div>
           <div class="order-content">${o.content}</div>
           <div class="order-meta">
-            <span class="meta-item">${o.district}</span>
-            <span class="meta-item">${o.createdAt}</span>
+            <span class="meta-item">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1C4.24 1 2 3.24 2 6c0 3.5 5 8 5 8s5-4.5 5-8c0-2.76-2.24-5-5-5z"/><circle cx="7" cy="6" r="1.5"/></svg>
+              ${o.district}
+            </span>
+            <span class="meta-item">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="10" y1="1" x2="10" y2="3"/></svg>
+              ${o.createdAt}
+            </span>
           </div>
           ${noteHtml}
         </div>
