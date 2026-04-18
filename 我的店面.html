@@ -201,12 +201,41 @@ select.form-control {
 }
 #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
+/* ── Bottom Nav (mobile) ── */
+.bottom-nav { display:none; }
+
 @media (max-width:640px) {
-  .nav { padding:0 16px; }
-  .nav-link { padding:6px 10px; font-size:12px; }
-  .main { padding:36px 16px 64px; }
+  .nav { padding:0 14px; }
+  .nav-links { display:none; }
+  .main { padding:28px 16px 0; padding-bottom:calc(68px + env(safe-area-inset-bottom,0px)); }
   .user-name { display:none; }
+  .page-title { font-size:26px; }
   .row-2 { grid-template-columns:1fr; }
+  .form-card { padding:20px; margin-bottom:32px; }
+  .store-card { padding:16px 18px; }
+  #toast { bottom:calc(68px + env(safe-area-inset-bottom,0px) + 12px); }
+
+  .bottom-nav {
+    display:flex; position:fixed; bottom:0; left:0; right:0;
+    background:var(--card); border-top:1px solid var(--border);
+    z-index:100; padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .bottom-nav-link {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:10px 0; gap:2px;
+    text-decoration:none; color:var(--text-3);
+    font-size:11px; font-weight:600; letter-spacing:.2px;
+    transition:color .15s;
+  }
+  .bottom-nav-link:hover { color:var(--text-2); }
+  .bottom-nav-link.active { color:var(--gold); }
+  .bottom-nav-dot {
+    width:4px; height:4px; border-radius:50%;
+    background:currentColor; opacity:0;
+    transition:opacity .15s;
+  }
+  .bottom-nav-link.active .bottom-nav-dot { opacity:1; }
 }
 </style>
 </head>
@@ -290,6 +319,12 @@ select.form-control {
 </main>
 
 <div id="toast"></div>
+
+<nav class="bottom-nav">
+  <a href="下單.html"     class="bottom-nav-link"><div class="bottom-nav-dot"></div>訂貨叫貨</a>
+  <a href="我的訂單.html" class="bottom-nav-link"><div class="bottom-nav-dot"></div>我的訂單</a>
+  <a href="我的店面.html"  class="bottom-nav-link active"><div class="bottom-nav-dot"></div>我的店面</a>
+</nav>
 
 <script>
 const firebaseConfig = {
