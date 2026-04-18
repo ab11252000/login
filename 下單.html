@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>訂貨叫貨 — 翔躍下單系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --green:       #06C755;
@@ -434,64 +436,73 @@ textarea.form-control {
 <div id="toast"></div>
 
 <script>
+// ── Firebase ──────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDOl7Kq_mZZPdCPkSb_oRPBlxh37sZG5ls",
+  authDomain: "xiangyue-order.firebaseapp.com",
+  projectId: "xiangyue-order",
+  storageBucket: "xiangyue-order.firebasestorage.app",
+  messagingSenderId: "89673554795",
+  appId: "1:89673554795:web:e101e39be2d99349a84a2e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── Auth ──────────────────────────────────────────────────────
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (!user || localStorage.getItem('isLoggedIn') !== 'true') {
   window.location.href = 'index.html';
 }
-const blockList = JSON.parse(localStorage.getItem('blockList') || '[]');
-if (blockList.find(b => b.userId === user?.id)) {
-  alert('此帳號已被停權，請聯絡管理員。');
-  localStorage.removeItem('isLoggedIn');
-  window.location.href = 'index.html';
-}
-
 document.getElementById('userAvatar').textContent = user.avatar;
 document.getElementById('userName').textContent   = user.name;
 
-// 顯示今日日期
+// 今日日期
 (function() {
   const d = new Date();
-  const opts = { year:'numeric', month:'long', day:'numeric', weekday:'long' };
-  document.getElementById('pageDate').textContent = d.toLocaleDateString('zh-TW', opts);
+  document.getElementById('pageDate').textContent =
+    d.toLocaleDateString('zh-TW', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
 })();
 
-// ── 公告 / 送貨地區 ──────────────────────────────────────────
-function renderInfo(id, key, placeholder) {
-  const val  = localStorage.getItem(key) || '';
-  const view = document.getElementById(id);
-  if (val.trim()) {
-    view.textContent = val;
-    view.classList.remove('empty');
-  } else {
-    view.textContent = placeholder;
-    view.classList.add('empty');
+// 檢查封鎖
+db.collection('blockList').doc(user.id).get().then(doc => {
+  if (doc.exists) {
+    alert('此帳號已被停權，請聯絡管理員。');
+    localStorage.removeItem('isLoggedIn');
+    window.location.href = 'index.html';
   }
+});
+
+// ── 公告 / 送貨地區 ──────────────────────────────────────────
+function setView(id, val, placeholder) {
+  const view = document.getElementById(id);
+  if (val && val.trim()) { view.textContent = val; view.classList.remove('empty'); }
+  else { view.textContent = placeholder; view.classList.add('empty'); }
 }
-
-
-renderInfo('announcementView', 'announcement', '目前無公告');
-renderInfo('deliveryView', 'deliveryAreas', '今日送貨地區尚未設定');
+db.collection('config').doc('announcement').get().then(doc =>
+  setView('announcementView', doc.exists ? doc.data().text : '', '目前無公告'));
+db.collection('config').doc('deliveryAreas').get().then(doc =>
+  setView('deliveryView', doc.exists ? doc.data().text : '', '今日送貨地區尚未設定'));
 
 // ── 店家 ──────────────────────────────────────────────────────
-function loadStores() {
-  const stores   = JSON.parse(localStorage.getItem('stores') || '[]');
-  const approved = stores.filter(s => s.status === 'approved');
-  const sel      = document.getElementById('storeSelect');
+const storeDataMap = {};
 
-  if (approved.length === 0) {
-    document.getElementById('noStoreWarn').classList.add('show');
-    return;
-  }
-  approved.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id;
-    opt.textContent = `${s.name}（${s.district}）`;
-    opt.dataset.district = s.district;
-    sel.appendChild(opt);
+function loadStores() {
+  db.collection('stores').where('status','==','approved').get().then(snap => {
+    const sel = document.getElementById('storeSelect');
+    const approved = [];
+    snap.forEach(doc => { const s = doc.data(); storeDataMap[s.id] = s; approved.push(s); });
+    if (!approved.length) { document.getElementById('noStoreWarn').classList.add('show'); return; }
+    approved.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `${s.name}（${s.district}）`;
+      opt.dataset.district = s.district;
+      sel.appendChild(opt);
+    });
   });
 }
 
-document.getElementById('storeSelect').addEventListener('change', function () {
+document.getElementById('storeSelect').addEventListener('change', function() {
   const opt = this.selectedOptions[0];
   if (opt.dataset.district) {
     document.getElementById('districtText').textContent = opt.dataset.district;
@@ -504,27 +515,22 @@ document.getElementById('storeSelect').addEventListener('change', function () {
 // ── 送出訂單 ──────────────────────────────────────────────────
 function submitOrder(e) {
   e.preventDefault();
-
-  const stores  = JSON.parse(localStorage.getItem('stores') || '[]');
   const storeId = document.getElementById('storeSelect').value;
-  const store   = stores.find(s => s.id === storeId);
+  const store   = storeDataMap[storeId];
   const content = document.getElementById('orderContent').value.trim();
   const note    = document.getElementById('orderNote').value.trim();
-
-  const orders  = JSON.parse(localStorage.getItem('orders') || '[]');
   const id      = 'O' + String(Date.now()).slice(-6);
   const now     = new Date().toLocaleString('zh-TW', { hour12:false }).replace('/','-').replace('/','-');
 
-  orders.push({
-    id, userId:user.id, userName:user.name, lineId:user.lineId,
+  db.collection('orders').doc(id).set({
+    id, userId:user.id, userName:user.name, lineId:user.lineId||'',
     storeId, storeName:store.name, district:store.district,
     content, note, status:'pending', createdAt:now,
-  });
-
-  localStorage.setItem('orders', JSON.stringify(orders));
-  document.getElementById('orderForm').reset();
-  document.getElementById('storeDistrict').style.display = 'none';
-  showToast('訂單已成功送出 — 編號 ' + id);
+  }).then(() => {
+    document.getElementById('orderForm').reset();
+    document.getElementById('storeDistrict').style.display = 'none';
+    showToast('訂單已成功送出 — 編號 ' + id);
+  }).catch(() => showToast('送出失敗，請稍後再試'));
 }
 
 function showToast(msg) {

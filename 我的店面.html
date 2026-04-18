@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>我的店面 — 翔躍下單系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --green:       #06C755;
@@ -345,6 +347,17 @@ select.form-control {
 <div id="toast"></div>
 
 <script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyDOl7Kq_mZZPdCPkSb_oRPBlxh37sZG5ls",
+  authDomain:        "xiangyue-order.firebaseapp.com",
+  projectId:         "xiangyue-order",
+  storageBucket:     "xiangyue-order.firebasestorage.app",
+  messagingSenderId: "89673554795",
+  appId:             "1:89673554795:web:e101e39be2d99349a84a2e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (!user || localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html';
 
@@ -358,19 +371,15 @@ const STATUS_MAP = {
   rejected: { label:'已拒絕', cls:'badge-rejected' },
 };
 
-function renderStores() {
-  const stores   = JSON.parse(localStorage.getItem('stores') || '[]');
-  const myStores = stores.filter(s => s.ownerId === user.id)
-                         .sort((a,b) => b.appliedAt.localeCompare(a.appliedAt));
+function renderStores(docs) {
   const grid = document.getElementById('storeGrid');
-
-  if (myStores.length === 0) {
+  if (docs.length === 0) {
     grid.innerHTML = `<div class="empty">尚無申請記錄，填寫上方表單送出申請</div>`;
     return;
   }
-
-  grid.innerHTML = myStores.map(s => {
+  grid.innerHTML = docs.map(s => {
     const st = STATUS_MAP[s.status] || STATUS_MAP.pending;
+    const safeName = s.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return `
       <div class="store-card">
         <div class="store-header">
@@ -379,12 +388,12 @@ function renderStores() {
         </div>
         <div class="store-info">
           <div class="store-row"><span class="store-lbl">縣市</span><span>${s.city||''}</span></div>
-          <div class="store-row"><span class="store-lbl">地區</span><span>${s.district}</span></div>
-          <div class="store-row"><span class="store-lbl">地址</span><span>${s.address}</span></div>
-          <div class="store-row"><span class="store-lbl">電話</span><span>${s.phone}</span></div>
-          <div class="store-row"><span class="store-lbl">申請</span><span>${s.appliedAt}</span></div>
+          <div class="store-row"><span class="store-lbl">地區</span><span>${s.district||''}</span></div>
+          <div class="store-row"><span class="store-lbl">地址</span><span>${s.address||''}</span></div>
+          <div class="store-row"><span class="store-lbl">電話</span><span>${s.phone||''}</span></div>
+          <div class="store-row"><span class="store-lbl">申請</span><span>${s.appliedAt||''}</span></div>
         </div>
-        <button class="btn-delete-store" onclick="deleteStore('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.status}')">
+        <button class="btn-delete-store" onclick="deleteStore('${s.id}','${safeName}','${s.status}')">
           <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="2,3.5 12,3.5"/><path d="M5.5 3.5V2.5h3V3.5"/>
             <rect x="3" y="3.5" width="8" height="8.5" rx="1.5"/>
@@ -396,13 +405,22 @@ function renderStores() {
   }).join('');
 }
 
-function applyStore(e) {
-  e.preventDefault();
-  const stores = JSON.parse(localStorage.getItem('stores') || '[]');
-  const id     = 'S' + String(Date.now()).slice(-5);
-  const today  = new Date().toISOString().slice(0,10);
+// Real-time listener for this user's stores
+db.collection('stores')
+  .where('ownerId', '==', user.id)
+  .orderBy('appliedAt', 'desc')
+  .onSnapshot(snap => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderStores(docs);
+  }, err => {
+    console.error('stores listener error', err);
+  });
 
-  stores.push({
+async function applyStore(e) {
+  e.preventDefault();
+  const id    = 'S' + String(Date.now()).slice(-8);
+  const today = new Date().toISOString().slice(0, 10);
+  const data  = {
     id,
     ownerId:   user.id,
     ownerName: user.name,
@@ -413,24 +431,29 @@ function applyStore(e) {
     phone:     document.getElementById('storePhone').value.trim(),
     status:    'pending',
     appliedAt: today,
-  });
-
-  localStorage.setItem('stores', JSON.stringify(stores));
-  document.getElementById('storeForm').reset();
-  renderStores();
-  showToast('店面申請已送出，待管理員審核');
+  };
+  try {
+    await db.collection('stores').doc(id).set(data);
+    document.getElementById('storeForm').reset();
+    showToast('店面申請已送出，待管理員審核');
+  } catch(err) {
+    showToast('送出失敗，請稍後再試');
+    console.error(err);
+  }
 }
 
-function deleteStore(storeId, storeName, status) {
+async function deleteStore(storeId, storeName, status) {
   const msg = status === 'pending'
     ? `確定要取消「${storeName}」的申請嗎？`
     : `確定要刪除「${storeName}」嗎？\n刪除後無法復原。`;
   if (!confirm(msg)) return;
-  const stores  = JSON.parse(localStorage.getItem('stores') || '[]');
-  const updated = stores.filter(s => s.id !== storeId);
-  localStorage.setItem('stores', JSON.stringify(updated));
-  renderStores();
-  showToast(status === 'pending' ? '已取消申請' : '店面已刪除');
+  try {
+    await db.collection('stores').doc(storeId).delete();
+    showToast(status === 'pending' ? '已取消申請' : '店面已刪除');
+  } catch(err) {
+    showToast('操作失敗，請稍後再試');
+    console.error(err);
+  }
 }
 
 function showToast(msg) {
@@ -446,8 +469,6 @@ function logout() {
   localStorage.removeItem('currentUser');
   window.location.href = 'index.html';
 }
-
-renderStores();
 </script>
 </body>
 </html>
