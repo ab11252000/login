@@ -3,29 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>訂貨叫貨 — 翔躍下單系統</title>
+<title>訂貨叫貨 — 翔躍企業社</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
-  --blue:        #3B82F6;
-  --blue-dark:   #2563EB;
-  --blue-dim:    rgba(59,130,246,.08);
-  --blue-border: rgba(59,130,246,.20);
-  --text:        #0F172A;
-  --text-2:      #64748B;
-  --text-3:      #94A3B8;
-  --border:      #E2E8F0;
-  --border-soft: #F1F5F9;
+  --gold:        #C6A96B;
+  --gold-dark:   #B8965A;
+  --gold-dim:    rgba(198,169,107,.08);
+  --gold-border: rgba(198,169,107,.28);
+  --gold-shadow: rgba(198,169,107,.20);
+  --text:        #111827;
+  --text-2:      #6B7280;
+  --text-3:      #9CA3AF;
+  --border:      #E5E7EB;
+  --border-soft: #F3F4F6;
   --bg:          #F8FAFC;
   --card:        #FFFFFF;
-  --green:       #22C55E;
-  --green-dark:  #16A34A;
-  --green-dim:   rgba(34,197,94,.10);
-  --amber:       #F59E0B;
-  --amber-bg:    #FFFBEB;
-  --amber-border:#FDE68A;
   --red:         #EF4444;
 }
 
@@ -44,214 +39,190 @@ body {
 .nav {
   background:var(--card);
   border-bottom:1px solid var(--border);
-  height:58px;
+  height:54px;
   display:flex; align-items:center;
-  padding:0 32px;
+  padding:0 28px;
   position:sticky; top:0; z-index:100;
 }
 .nav-brand {
-  display:flex; align-items:center; gap:10px;
-  text-decoration:none; margin-right:36px; flex-shrink:0;
+  display:flex; align-items:center; gap:8px;
+  text-decoration:none; flex-shrink:0;
 }
-.nav-brand-dot {
-  width:8px; height:8px; border-radius:50%;
-  background:var(--blue);
-  box-shadow:0 0 0 3px var(--blue-dim);
+.nav-brand-mark {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--gold);
 }
-.nav-brand-text { font-size:15px; font-weight:800; color:var(--text); letter-spacing:.2px; }
-.nav-brand-sub  { font-size:12px; color:var(--text-3); font-weight:400; }
-.nav-brand-sep  { width:1px; height:16px; background:var(--border); }
-.nav-links { display:flex; align-items:center; gap:2px; flex:1; }
+.nav-brand-text {
+  font-size:14px; font-weight:800; color:var(--text); letter-spacing:.5px;
+}
+.nav-links {
+  display:flex; align-items:center; gap:0; flex:1; justify-content:center;
+}
 .nav-link {
-  padding:6px 14px; border-radius:8px;
+  padding:6px 16px;
   font-size:13px; font-weight:500; text-decoration:none;
-  color:var(--text-2); transition:all .15s;
+  color:var(--text-3); transition:color .15s; letter-spacing:.1px;
 }
-.nav-link:hover { background:var(--border-soft); color:var(--text); }
-.nav-link.active { color:var(--blue); font-weight:700; background:var(--blue-dim); }
-.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-link:hover { color:var(--text-2); }
+.nav-link.active { color:var(--gold); font-weight:700; }
+.nav-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
 .user-pill {
-  display:flex; align-items:center; gap:9px;
-  padding:5px 14px 5px 6px; border-radius:100px;
-  border:1px solid var(--border); background:var(--card);
+  display:flex; align-items:center; gap:8px;
+  padding:4px 12px 4px 5px; border-radius:100px;
+  border:1px solid var(--border);
 }
 .user-avatar {
-  width:26px; height:26px; border-radius:50%;
-  background:var(--blue-dim); border:1.5px solid var(--blue-border);
-  font-size:11px; font-weight:800; color:var(--blue);
+  width:24px; height:24px; border-radius:50%;
+  border:1.5px solid var(--gold-border);
+  font-size:10px; font-weight:800; color:var(--gold);
   display:flex; align-items:center; justify-content:center;
+  background:var(--gold-dim);
 }
-.user-name { font-size:13px; font-weight:600; color:var(--text); }
+.user-name { font-size:12px; font-weight:600; color:var(--text-2); }
 .btn-logout {
-  padding:6px 14px; border-radius:8px;
+  padding:5px 12px; border-radius:7px;
   border:1px solid var(--border); background:transparent;
-  color:var(--text-2); font-size:12px; font-weight:600;
+  color:var(--text-3); font-size:12px; font-weight:500;
   font-family:inherit; cursor:pointer; transition:all .15s;
 }
-.btn-logout:hover { border-color:#FCA5A5; color:var(--red); background:#FFF5F5; }
+.btn-logout:hover { color:var(--red); border-color:#FECACA; background:#FFF5F5; }
 
-/* ── Layout ── */
+/* ── Main ── */
 .main {
-  max-width:720px; margin:0 auto; padding:48px 24px 80px;
-  animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+  max-width:600px; margin:0 auto; padding:48px 20px 80px;
+  animation:fadeIn .5s cubic-bezier(.22,1,.36,1) both;
 }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(12px); }
   to   { opacity:1; transform:translateY(0); }
 }
 
-.page-header { margin-bottom:32px; }
-.page-header-eyebrow {
-  font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
-  color:var(--text-3); margin-bottom:8px;
+/* ── Page header ── */
+.page-eyebrow {
+  font-size:10.5px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--text-3); margin-bottom:6px;
 }
-.page-header-title { font-size:28px; font-weight:900; letter-spacing:-.5px; color:var(--text); line-height:1.1; }
-.page-header-date  { font-size:12px; color:var(--text-3); margin-top:6px; }
+.page-title {
+  font-size:30px; font-weight:900; letter-spacing:-.5px;
+  color:var(--text); line-height:1.1; margin-bottom:6px;
+}
+.page-date { font-size:12px; color:var(--text-3); margin-bottom:32px; }
 
-/* ── Info cards ── */
-.info-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+/* ── Info strip area ── */
+.delivery-line {
+  font-size:13px; color:var(--text-3); margin-bottom:12px;
+  line-height:1.6;
+}
+.delivery-line span { color:var(--text-2); }
+
+.announce-strip {
+  background:#FEF7E7;
+  border:1px solid #FDECC8;
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:12.5px; color:#92400E; line-height:1.7;
   margin-bottom:28px;
+  display:none;
 }
-.info-card {
-  border-radius:12px; padding:20px 22px;
-  position:relative; overflow:hidden;
-  transition:box-shadow .2s;
-}
-.info-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); }
-.info-card.announcement { background:var(--amber-bg); border:1px solid var(--amber-border); }
-.info-card.delivery     { background:var(--blue-dim);  border:1px solid var(--blue-border); }
-
-.info-card-top { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
-.info-card-icon {
-  width:30px; height:30px; border-radius:8px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
-.info-card.announcement .info-card-icon { background:rgba(245,158,11,.15); }
-.info-card.delivery      .info-card-icon { background:rgba(59,130,246,.12); }
-.info-card-icon svg { width:15px; height:15px; }
-.info-card.announcement .info-card-icon svg { color:#D97706; }
-.info-card.delivery      .info-card-icon svg { color:var(--blue-dark); }
-
-.info-card-label { font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; }
-.info-card.announcement .info-card-label { color:#B45309; }
-.info-card.delivery      .info-card-label { color:var(--blue-dark); }
-
-.info-card-divider { height:1px; margin-bottom:12px; }
-.info-card.announcement .info-card-divider { background:rgba(245,158,11,.20); }
-.info-card.delivery      .info-card-divider { background:rgba(59,130,246,.15); }
-
-.info-card-content { font-size:13.5px; color:var(--text); line-height:1.8; white-space:pre-wrap; }
-.info-card-content.empty { color:var(--text-3); font-style:italic; font-size:13px; }
-
-@media (max-width:580px) { .info-grid { grid-template-columns:1fr; } }
+.announce-strip.visible { display:block; }
 
 /* ── No store warning ── */
 .no-store-warn {
-  background:var(--amber-bg); border:1px solid var(--amber-border);
-  border-radius:10px; padding:14px 18px;
   font-size:13px; color:#92400E;
-  display:none; align-items:center; gap:8px; margin-bottom:16px;
+  background:#FEF7E7; border:1px solid #FDECC8;
+  border-radius:8px; padding:10px 14px;
+  display:none; margin-bottom:16px;
 }
-.no-store-warn.show { display:flex; }
-.no-store-warn a { color:var(--blue-dark); font-weight:700; text-decoration:none; }
-.no-store-warn a:hover { text-decoration:underline; }
+.no-store-warn.show { display:block; }
+.no-store-warn a { color:var(--gold-dark); font-weight:700; text-decoration:none; }
 
-/* ── Order card ── */
-.order-card {
+/* ── Form card ── */
+.form-card {
   background:var(--card);
   border:1px solid var(--border);
   border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.06);
+  padding:28px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05), 0 4px 20px rgba(0,0,0,.06);
 }
-.order-card-header {
-  padding:20px 28px 18px;
-  border-bottom:1px solid var(--border-soft);
-}
-.order-card-title { font-size:14px; font-weight:800; color:var(--text); }
-.order-card-body { padding:24px 28px 28px; }
 
-.form-group { margin-bottom:22px; }
+.form-group { margin-bottom:20px; }
+
 .form-label {
-  display:block; font-size:12px; font-weight:700;
-  color:var(--text-2); margin-bottom:8px; letter-spacing:.4px; text-transform:uppercase;
+  display:block;
+  font-size:11px; font-weight:700; letter-spacing:.8px;
+  text-transform:uppercase; color:var(--text-3);
+  margin-bottom:8px;
 }
-.form-label .req { color:var(--red); margin-left:2px; font-style:normal; }
+.form-label .req { color:var(--gold); margin-left:2px; }
 
 .form-control {
   width:100%; padding:12px 14px;
   border:1.5px solid var(--border);
-  border-radius:8px; font-size:14px;
-  font-family:inherit; color:var(--text);
+  border-radius:8px;
+  font-size:14px; font-family:inherit; color:var(--text);
   background:var(--card); outline:none;
-  transition:border-color .15s, box-shadow .15s;
-  line-height:1.6;
+  transition:border-color .2s, box-shadow .2s;
+  line-height:1.6; appearance:none;
 }
 .form-control:focus {
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px var(--blue-dim);
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(198,169,107,.10);
 }
 .form-control::placeholder { color:var(--text-3); }
+
 select.form-control {
-  cursor:pointer; appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 12px center; padding-right:36px;
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center;
+  padding-right:38px;
 }
-textarea.form-control { resize:vertical; min-height:110px; line-height:1.7; }
+textarea.form-control { resize:vertical; min-height:120px; }
 
-.form-hint {
-  display:flex; align-items:center; gap:5px;
+.form-divider { height:1px; background:var(--border-soft); margin:4px 0 20px; }
+
+.store-hint {
   font-size:11.5px; color:var(--text-3); margin-top:6px;
+  display:none;
 }
-.form-hint svg { width:12px; height:12px; flex-shrink:0; }
-
-#storeDistrict {
-  display:none; font-size:12px; color:var(--text-3); margin-top:7px;
-}
-#storeDistrict strong { color:var(--text-2); font-weight:700; }
-
-.form-divider { height:1px; background:var(--border-soft); margin:4px 0 22px; }
+#storeDistrict { display:none; }
 
 /* ── Submit button ── */
 .btn-submit {
-  width:100%; padding:14px 0;
-  background:var(--blue); color:white;
-  border:none; border-radius:8px;
-  font-size:14px; font-weight:700; font-family:inherit;
-  cursor:pointer; letter-spacing:.3px;
-  transition:background .15s, box-shadow .15s, transform .1s;
-  box-shadow:0 2px 10px rgba(59,130,246,.28);
-  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:15px;
+  background:var(--gold); color:#fff;
+  border:none; border-radius:10px;
+  font-size:15px; font-weight:700; font-family:inherit;
+  letter-spacing:.4px; cursor:pointer;
+  box-shadow:0 2px 12px var(--gold-shadow);
+  transition:background .2s, box-shadow .2s, transform .1s;
+  margin-top:8px;
 }
 .btn-submit:hover {
-  background:var(--blue-dark);
-  box-shadow:0 4px 18px rgba(59,130,246,.36);
+  background:var(--gold-dark);
+  box-shadow:0 4px 22px rgba(198,169,107,.38);
 }
 .btn-submit:active { transform:scale(.99); }
-.btn-submit svg { width:16px; height:16px; }
 
 /* ── Toast ── */
 #toast {
   position:fixed; bottom:28px; left:50%;
-  transform:translateX(-50%) translateY(70px);
-  background:var(--text); color:white;
-  padding:12px 22px; border-radius:10px;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--text); color:#fff;
+  padding:11px 22px; border-radius:9px;
   font-size:13px; font-weight:600;
-  box-shadow:0 8px 32px rgba(0,0,0,.18);
-  transition:transform .32s cubic-bezier(.22,1,.36,1), opacity .32s;
+  box-shadow:0 6px 28px rgba(0,0,0,.16);
+  transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s;
   opacity:0; z-index:500; white-space:nowrap;
 }
 #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
 @media (max-width:640px) {
   .nav { padding:0 16px; }
-  .nav-brand-sub, .nav-brand-sep { display:none; }
+  .nav-links { gap:0; }
   .nav-link { padding:6px 10px; font-size:12px; }
-  .main { padding:32px 16px 64px; }
-  .order-card-header, .order-card-body { padding-left:20px; padding-right:20px; }
-  .page-header-title { font-size:24px; }
+  .main { padding:36px 16px 64px; }
   .user-name { display:none; }
+  .page-title { font-size:26px; }
 }
 </style>
 </head>
@@ -259,10 +230,8 @@ textarea.form-control { resize:vertical; min-height:110px; line-height:1.7; }
 
 <nav class="nav">
   <a class="nav-brand" href="下單.html">
-    <div class="nav-brand-dot"></div>
-    <span class="nav-brand-text">翔躍</span>
-    <div class="nav-brand-sep"></div>
-    <span class="nav-brand-sub">下單系統</span>
+    <div class="nav-brand-mark"></div>
+    <span class="nav-brand-text">翔躍企業社</span>
   </a>
   <div class="nav-links">
     <a href="下單.html"     class="nav-link active">訂貨叫貨</a>
@@ -280,91 +249,51 @@ textarea.form-control { resize:vertical; min-height:110px; line-height:1.7; }
 
 <main class="main">
 
-  <div class="page-header">
-    <div class="page-header-eyebrow">翔躍企業社</div>
-    <div class="page-header-title">訂貨叫貨</div>
-    <div class="page-header-date" id="pageDate"></div>
+  <div class="page-eyebrow">翔躍企業社</div>
+  <div class="page-title">訂貨叫貨</div>
+  <div class="page-date" id="pageDate"></div>
+
+  <div class="delivery-line" id="deliveryLine" style="display:none;">
+    今日送貨：<span id="deliveryView"></span>
   </div>
 
-  <div class="info-grid">
-    <div class="info-card announcement">
-      <div class="info-card-top">
-        <div class="info-card-icon">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 2a5 5 0 100 10A5 5 0 008 2z"/>
-            <path d="M6 11.5h4v1.5a1 1 0 01-1 1H7a1 1 0 01-1-1v-1.5z"/>
-            <line x1="8" y1="2" x2="8" y2="1"/><line x1="8" y1="13" x2="8" y2="14.5"/>
-            <line x1="2" y1="7" x2="1" y2="7"/><line x1="14" y1="7" x2="15" y2="7"/>
-          </svg>
-        </div>
-        <div class="info-card-label">重要公告</div>
-      </div>
-      <div class="info-card-divider"></div>
-      <div class="info-card-content" id="announcementView"></div>
-    </div>
-
-    <div class="info-card delivery">
-      <div class="info-card-top">
-        <div class="info-card-icon">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="6" width="9" height="7" rx="1.2"/>
-            <path d="M10 8.5h2.8l2 2.5v2.5H10V8.5z"/>
-            <circle cx="4" cy="14" r="1.2"/><circle cx="12" cy="14" r="1.2"/>
-          </svg>
-        </div>
-        <div class="info-card-label">今日送貨地區</div>
-      </div>
-      <div class="info-card-divider"></div>
-      <div class="info-card-content" id="deliveryView"></div>
-    </div>
+  <div class="announce-strip" id="announceStrip">
+    <span id="announcementView"></span>
   </div>
 
   <div class="no-store-warn" id="noStoreWarn">
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4.5M10 14h.01"/></svg>
-    目前沒有已通過審核的店家可供選擇，請稍後再試或
+    目前沒有已通過審核的店家，請先
     <a href="我的店面.html">申請開設店面</a>
   </div>
 
-  <div class="order-card">
-    <div class="order-card-header">
-      <div class="order-card-title">填寫訂單資訊</div>
-    </div>
-    <div class="order-card-body">
-      <form id="orderForm" onsubmit="submitOrder(event)">
+  <div class="form-card">
+    <form id="orderForm" onsubmit="submitOrder(event)">
 
-        <div class="form-group">
-          <label class="form-label" for="storeSelect">選擇店家 <i class="req">*</i></label>
-          <select class="form-control" id="storeSelect" required>
-            <option value="">— 請選擇店家 —</option>
-          </select>
-          <p id="storeDistrict">地區：<strong id="districtText"></strong></p>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="storeSelect">選擇店家 <i class="req">*</i></label>
+        <select class="form-control" id="storeSelect" required>
+          <option value="">— 請選擇店家 —</option>
+        </select>
+        <p id="storeDistrict" class="store-hint">地區：<strong id="districtText"></strong></p>
+      </div>
 
-        <div class="form-divider"></div>
+      <div class="form-divider"></div>
 
-        <div class="form-group">
-          <label class="form-label" for="orderContent">訂貨內容 <i class="req">*</i></label>
-          <textarea class="form-control" id="orderContent" placeholder="請詳細描述需要的商品、規格、數量…" required></textarea>
-          <div class="form-hint">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11h.01"/></svg>
-            請盡量填寫詳細以加快處理速度
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="orderContent">訂貨內容 <i class="req">*</i></label>
+        <textarea class="form-control" id="orderContent"
+          placeholder="請詳細填寫商品名稱、規格與數量…" required></textarea>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label" for="orderNote">備註</label>
-          <input class="form-control" type="text" id="orderNote" placeholder="特殊需求、送貨時間等（選填）">
-        </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" for="orderNote">備註</label>
+        <input class="form-control" type="text" id="orderNote"
+          placeholder="特殊需求、送貨時間等（選填）">
+      </div>
 
-        <button type="submit" class="btn-submit">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 10l14 0M13 5l5 5-5 5"/>
-          </svg>
-          送出訂單
-        </button>
+      <button type="submit" class="btn-submit" style="margin-top:28px;">送出訂單</button>
 
-      </form>
-    </div>
+    </form>
   </div>
 
 </main>
@@ -409,10 +338,22 @@ function setView(id, val, placeholder) {
   if (val && val.trim()) { view.textContent = val; view.classList.remove('empty'); }
   else { view.textContent = placeholder; view.classList.add('empty'); }
 }
-db.collection('config').doc('announcement').get().then(doc =>
-  setView('announcementView', doc.exists ? doc.data().text : '', '目前無公告'));
-db.collection('config').doc('deliveryAreas').get().then(doc =>
-  setView('deliveryView', doc.exists ? doc.data().text : '', '今日送貨地區尚未設定'));
+
+db.collection('config').doc('announcement').get().then(doc => {
+  const text = doc.exists ? doc.data().text : '';
+  if (text && text.trim()) {
+    document.getElementById('announcementView').textContent = text;
+    document.getElementById('announceStrip').classList.add('visible');
+  }
+});
+
+db.collection('config').doc('deliveryAreas').get().then(doc => {
+  const text = doc.exists ? doc.data().text : '';
+  if (text && text.trim()) {
+    document.getElementById('deliveryView').textContent = text;
+    document.getElementById('deliveryLine').style.display = 'block';
+  }
+});
 
 const storeDataMap = {};
 
