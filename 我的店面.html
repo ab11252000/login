@@ -387,9 +387,9 @@ function renderStores(docs) {
 
 db.collection('stores')
   .where('ownerId', '==', user.id)
-  .orderBy('appliedAt', 'desc')
   .onSnapshot(snap => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
     renderStores(docs);
   }, err => console.error('stores listener error', err));
 
